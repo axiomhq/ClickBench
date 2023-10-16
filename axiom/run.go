@@ -199,7 +199,7 @@ func (c *axiomClient) do(ctx context.Context, rawURL string, id int, body, v any
 	req.Header.Set("User-Agent", "axiom-clickbench/"+c.version)
 	req.Header.Set("X-Axiom-Org-Id", c.org)
 
-	if id > 0 {
+	if id >= 0 {
 		req.Header.Set("X-Axiom-Trace-Label", fmt.Sprintf("clickbench-%d", id))
 	}
 
@@ -306,7 +306,7 @@ func (c *axiomClient) ServerVersions(ctx context.Context, began time.Time, trace
   `, traceDataset, buf.String(), from)
 
 	var cols [][]any
-	r, _, err := c.query(ctx, 0, aplQuery, true)
+	r, _, err := c.query(ctx, -1, aplQuery, true)
 	if err != nil {
 		return nil, err
 	}
