@@ -320,7 +320,7 @@ func (c *axiomClient) ServerVersions(ctx context.Context, began time.Time, trace
   `, traceDataset, buf.String(), from)
 
 	var cols [][]any
-	r, _, err := c.query(ctx, -1, aplQuery, true)
+	r, _, err := c.query(ctx, -1, aplQuery, true, false)
 	if err != nil {
 		return nil, err
 	}
