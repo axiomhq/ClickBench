@@ -98,7 +98,7 @@ func gitSha() string {
 
 func benchmark(ctx context.Context, cli *axiomClient, id int, query string, iters int, noCache, noColumnFilters bool, enc *json.Encoder) error {
 	for i := 1; i <= iters; i++ {
-		result, err := cli.Query(ctx, id, query, noCache, noColumnFilters)
+		result, err := cli.Query(ctx, i, id, query, noCache, noColumnFilters)
 		if err != nil {
 			return fmt.Errorf("failed query #%d, iter %d: %w", id, i, err)
 		}
@@ -184,6 +184,8 @@ type QueryResult struct {
 	Error string `json:"error"`
 	// Cost is the cost of the query in GBms
 	Cost int `json:"cost"`
+	// Iter is the iteration number of the query within a run
+	Iter int `json:"iter"`
 }
 
 type httpError struct {
@@ -258,7 +260,7 @@ func (c *axiomClient) query(ctx context.Context, id int, aplQuery string, noCach
 	return &r, resp, nil
 }
 
-func (c *axiomClient) Query(ctx context.Context, id int, aplQuery string, noCache, noColumnFilters bool) (*QueryResult, error) {
+func (c *axiomClient) Query(ctx context.Context, iter, id int, aplQuery string, noCache, noColumnFilters bool) (*QueryResult, error) {
 	began := time.Now().UTC()
 
 	result := &QueryResult{
@@ -266,6 +268,7 @@ func (c *axiomClient) Query(ctx context.Context, id int, aplQuery string, noCach
 		ID:      id,
 		Time:    began,
 		Version: c.version,
+		Iter:    iter,
 	}
 
 	var httpErr *httpError

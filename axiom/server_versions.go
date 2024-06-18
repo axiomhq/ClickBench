@@ -60,7 +60,7 @@ func serverVersions(apiURL, traceURL, org, token, label string, failfast bool) e
 		earliest time.Time
 	)
 
-	sc.Buffer(make([]byte, 0, 1024*1024), 0)
+	sc.Buffer(make([]byte, 0, 10*1024*1024), 0)
 
 	for sc.Scan() {
 		var r QueryResult
