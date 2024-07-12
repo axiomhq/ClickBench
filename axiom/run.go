@@ -37,17 +37,17 @@ func runCmd() command {
 	iters := fs.Int("iters", 3, "Number of iterations to run each query")
 	failfast := fs.Bool("failfast", false, "Exit on first error")
 	noCache := fs.Bool("no-cache", true, "Do not use axiom results caching")
-	noColumnFilters := fs.Bool("no-column-filters", false, "Do not use axiom column filters")
+	noSuperblocks := fs.Bool("no-superblocks", false, "Do not use axiom superblocks")
 	version := fs.String("version", firstNonZero(gitSha(), "dev"), "Version of the benchmarking client code")
 	label := fs.String("label", "", "Profile label")
 
 	return command{fs, func(args []string) error {
 		fs.Parse(args)
-		return run(*version, *apiURL, *traceURL, *org, *token, *label, *iters, *failfast, *noCache, *noColumnFilters)
+		return run(*version, *apiURL, *traceURL, *org, *token, *label, *iters, *failfast, *noCache, *noSuperblocks)
 	}}
 }
 
-func run(version, apiURL, traceURL, org, token, label string, iters int, failfast, noCache, noColumnFilters bool) error {
+func run(version, apiURL, traceURL, org, token, label string, iters int, failfast, noCache, noSuperblocks bool) error {
 	if apiURL == "" {
 		return fmt.Errorf("api-url cannot be empty")
 	}
@@ -75,7 +75,7 @@ func run(version, apiURL, traceURL, org, token, label string, iters int, failfas
 	for sc.Scan() {
 		query := sc.Text()
 		if !strings.HasPrefix(query, "//") {
-			if err := benchmark(ctx, cli, id, query, iters, noCache, noColumnFilters, enc); err != nil {
+			if err := benchmark(ctx, cli, id, query, iters, noCache, noSuperblocks, enc); err != nil {
 				if failfast {
 					return err
 				}
@@ -96,9 +96,9 @@ func gitSha() string {
 	return strings.TrimSpace(string(sha))
 }
 
-func benchmark(ctx context.Context, cli *axiomClient, id int, query string, iters int, noCache, noColumnFilters bool, enc *json.Encoder) error {
+func benchmark(ctx context.Context, cli *axiomClient, id int, query string, iters int, noCache, noSuperblocks bool, enc *json.Encoder) error {
 	for i := 1; i <= iters; i++ {
-		result, err := cli.Query(ctx, i, id, query, noCache, noColumnFilters)
+		result, err := cli.Query(ctx, i, id, query, noCache, noSuperblocks)
 		if err != nil {
 			return fmt.Errorf("failed query #%d, iter %d: %w", id, i, err)
 		}
@@ -240,10 +240,10 @@ func (c *axiomClient) do(ctx context.Context, rawURL string, id int, body, v any
 	return resp, nil
 }
 
-func (c *axiomClient) query(ctx context.Context, id int, aplQuery string, noCache, noColumnFilters bool) (*aplQueryResponse, *http.Response, error) {
+func (c *axiomClient) query(ctx context.Context, id int, aplQuery string, noCache, noSuperblocks bool) (*aplQueryResponse, *http.Response, error) {
 	uri := *c.apiURL
 	uri.Path = path.Join(uri.Path, "v1/datasets/_apl")
-	uri.RawQuery = fmt.Sprintf("nocache=%t&nocolumnfilters=%t&format=tabular", noCache, noColumnFilters)
+	uri.RawQuery = fmt.Sprintf("nocache=%t&nosuperblocks=%t&format=tabular", noCache, noSuperblocks)
 
 	body := struct {
 		APL string `json:"apl"`
@@ -260,7 +260,7 @@ func (c *axiomClient) query(ctx context.Context, id int, aplQuery string, noCach
 	return &r, resp, nil
 }
 
-func (c *axiomClient) Query(ctx context.Context, iter, id int, aplQuery string, noCache, noColumnFilters bool) (*QueryResult, error) {
+func (c *axiomClient) Query(ctx context.Context, iter, id int, aplQuery string, noCache, noSuperblocks bool) (*QueryResult, error) {
 	began := time.Now().UTC()
 
 	result := &QueryResult{
@@ -272,7 +272,7 @@ func (c *axiomClient) Query(ctx context.Context, iter, id int, aplQuery string, 
 	}
 
 	var httpErr *httpError
-	r, httpResp, err := c.query(ctx, id, aplQuery, noCache, noColumnFilters)
+	r, httpResp, err := c.query(ctx, id, aplQuery, noCache, noSuperblocks)
 	if err != nil && !errors.As(err, &httpErr) {
 		return nil, err
 	}
