@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "2 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -15,12 +15,12 @@ jobs:
   clickbench:
     runs-on: ubuntu-latest
     env:
-      AXIOM_URL: ${{ secrets.AXIOM_URL }}
-      AXIOM_ORG_ID: ${{ secrets.AXIOM_ORG_ID }}
-      AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
-      AXIOM_TRACE_URL: ${{ secrets.AXIOM_TRACE_URL }}
-      AXIOM_QUERY_DATASET: ${{ secrets.AXIOM_QUERY_DATASET }}
-      AXIOM_RESULTS_DATASET: ${{ secrets.AXIOM_RESULTS_DATASET }}
+      AXIOM_URL: ${{ secrets.AXIOM_URL_BYOB }}
+      AXIOM_ORG_ID: ${{ secrets.AXIOM_ORG_ID_BYOB }}
+      AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN_BYOB }}
+      AXIOM_TRACE_URL: ${{ secrets.AXIOM_TRACE_URL_BYOB }}
+      AXIOM_QUERY_DATASET: ${{ secrets.AXIOM_QUERY_DATASET_BYOB }}
+      AXIOM_RESULTS_DATASET: ${{ secrets.AXIOM_RESULTS_DATASET_BYOB }}
 
     steps:
       - name: Checkout code

@@ -38,16 +38,17 @@ func runCmd() command {
 	failfast := fs.Bool("failfast", false, "Exit on first error")
 	noCache := fs.Bool("no-cache", true, "Do not use axiom results caching")
 	noSuperblocks := fs.Bool("no-superblocks", false, "Do not use axiom superblocks")
+	queryDataset := fs.String("query-dataset", "", "The dataset to run queries on")
 	version := fs.String("version", firstNonZero(gitSha(), "dev"), "Version of the benchmarking client code")
 	label := fs.String("label", "", "Profile label")
 
 	return command{fs, func(args []string) error {
 		fs.Parse(args)
-		return run(*version, *apiURL, *traceURL, *org, *token, *label, *iters, *failfast, *noCache, *noSuperblocks)
+		return run(*version, *apiURL, *traceURL, *org, *token, *label, *iters, *failfast, *noCache, *noSuperblocks, *queryDataset)
 	}}
 }
 
-func run(version, apiURL, traceURL, org, token, label string, iters int, failfast, noCache, noSuperblocks bool) error {
+func run(version, apiURL, traceURL, org, token, label string, iters int, failfast, noCache, noSuperblocks bool, queryDataset string) error {
 	if apiURL == "" {
 		return fmt.Errorf("api-url cannot be empty")
 	}
@@ -58,6 +59,10 @@ func run(version, apiURL, traceURL, org, token, label string, iters int, failfas
 
 	if iters <= 0 {
 		return fmt.Errorf("iters must be greater than 0")
+	}
+
+	if queryDataset == "" {
+		return fmt.Errorf("queryDataset cannot be empty")
 	}
 
 	cli, err := newAxiomClient(http.DefaultClient, version, apiURL, org, token, traceURL, label)
@@ -75,6 +80,7 @@ func run(version, apiURL, traceURL, org, token, label string, iters int, failfas
 	for sc.Scan() {
 		query := sc.Text()
 		if !strings.HasPrefix(query, "//") {
+			query = fmt.Sprintf(query, queryDataset)
 			if err := benchmark(ctx, cli, id, query, iters, noCache, noSuperblocks, enc); err != nil {
 				if failfast {
 					return err
