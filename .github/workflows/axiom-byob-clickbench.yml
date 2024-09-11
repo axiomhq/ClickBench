@@ -1,4 +1,4 @@
-name: Clickbench Axiom DB
+name: Clickbench Axiom DB on BYOB
 
 on:
   push:
