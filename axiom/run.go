@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -386,73 +385,8 @@ func columns(r *aplQueryResponse) [][]any {
 		return r.Tables[0].Columns
 	}
 
-	colMap := make(map[string][]any)
-	colTypes := map[string]func(any) any{}
-	var colNames []string
-
-	add := func(name string, values ...any) {
-		if _, ok := colMap[name]; !ok {
-			colNames = append(colNames, name)
-		}
-
-		colType := colTypes[name]
-		for _, v := range values {
-			if colType == nil {
-				// Ensure JSON encoding matches that of Clickhouse --format=JSONCompactColumns
-				// so that we can diff the results of the two.
-				switch n := v.(type) {
-				case float64:
-					if n != math.Trunc(n) {
-						// n is a float number with decimal places
-						colType = func(v any) any { return strconv.FormatFloat(v.(float64), 'f', 13, 64) }
-					} else {
-						colType = func(v any) any { return strconv.FormatInt(int64(v.(float64)), 10) }
-					}
-				default:
-					colType = func(v any) any { return v }
-				}
-
-				colTypes[name] = colType
-			}
-
-			if v == nil {
-				colMap[name] = append(colMap[name], v)
-			} else {
-				colMap[name] = append(colMap[name], colType(v))
-			}
-		}
-	}
-
-	for _, match := range r.Matches {
-		for colName, values := range match.Data {
-			add(colName, values)
-		}
-	}
-
-	for _, total := range r.Buckets.Totals {
-		if len(total.Group) > 0 {
-			// Order matters, but total.Group is a map, so get the keys
-			// from r.GroupBy and use them to index into total.Group.
-			if len(r.Request.GroupBy) != len(total.Group) {
-				panic(fmt.Sprintf("GroupBy: %v, total.Group: %v", r.Request.GroupBy, total.Group))
-			}
-
-			for _, name := range r.Request.GroupBy {
-				add(name, total.Group[name])
-			}
-		}
-
-		for _, agg := range total.Aggregations {
-			add(agg.Alias, agg.Value)
-		}
-	}
-
-	cols := make([][]any, len(colNames))
-	for i, name := range colNames {
-		cols[i] = colMap[name]
-	}
-
-	return cols
+	// legacy format is not supported
+	return nil
 }
 
 func (c *axiomClient) buildTraceURL(timestamp time.Time, traceID string) string {

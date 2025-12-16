@@ -1,5 +1,7 @@
 module github.com/axiomhq/ClickBench/axiom
 
-go 1.22
+go 1.24.0
 
-require github.com/axiomhq/axiom-go v0.17.2
+toolchain go1.24.11
+
+require github.com/axiomhq/axiom-go v0.26.2
