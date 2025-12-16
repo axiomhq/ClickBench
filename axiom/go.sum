@@ -1,5 +1,7 @@
 github.com/axiomhq/axiom-go v0.17.2 h1:tPtwQ7JcbAYxNE4MKg1Qp2aOdFn3y2+Ov5huvaiiRcU=
 github.com/axiomhq/axiom-go v0.17.2/go.mod h1:ogjghSE8tEYOhPqGsgoRpqQl4NIDEAeR8KjwCk2LT1U=
+github.com/axiomhq/axiom-go v0.26.2 h1:Kfe66TSMRncvTTAfV1/HS010Bu2KgJ8Hj+JrpfzLw0E=
+github.com/axiomhq/axiom-go v0.26.2/go.mod h1:Yz/wFyWm1Q8tXzxZ2YBtc3tM/ScdMhoSSIWlP7ioqr4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
