@@ -335,14 +335,20 @@ func (c *axiomClient) ServerVersions(ctx context.Context, began time.Time, trace
 
 	// traceID -> serverName -> serverVersion
 	serverVersions := make(map[string]map[string]string, len(cols[0]))
-	for i, name := range cols[1] {
-		traceID := cols[0][i].(string)
+	for i := range cols[1] {
+		// Spans without a service version, such as Envoy Gateway spans, are skipped.
+		traceID, ok1 := cols[0][i].(string)
+		name, ok2 := cols[1][i].(string)
+		version, ok3 := cols[2][i].(string)
+		if !ok1 || !ok2 || !ok3 {
+			continue
+		}
 		versions := serverVersions[traceID]
 		if versions == nil {
 			versions = make(map[string]string)
 			serverVersions[traceID] = versions
 		}
-		versions[name.(string)] = cols[2][i].(string)
+		versions[name] = version
 	}
 
 	return serverVersions, nil
